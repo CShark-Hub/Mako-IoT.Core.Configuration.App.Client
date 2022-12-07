@@ -1,0 +1,24 @@
+﻿@using MakoIoT.Core.Configuration.App.Client.ViewModels
+
+@inject MessageViewModel ViewModel
+
+@if (!String.IsNullOrEmpty(ViewModel?.MessageText))
+{
+    <div id="message" class="@ViewModel.MessageType.ToString().ToLower()">
+        @ViewModel.MessageText
+        <a class="dismiss" @onclick="ViewModel.HideMessage">🗙</a>
+    </div>
+}
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        ViewModel.ViewUpdated += (sender, args) =>
+        {
+            StateHasChanged();
+        };
+    }
+}

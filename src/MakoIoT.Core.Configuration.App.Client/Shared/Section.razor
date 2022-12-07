@@ -1,0 +1,83 @@
+﻿@using MakoIoT.Core.Configuration.App.Client.ViewModels
+@using MakoIoT.Core.Configuration.App.Client.Model
+
+@inject IModalService Modal  
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button @ViewModel.CollapsedString" type="button" @onclick="ViewModel.ToggleSection" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            @ViewModel.Label
+        </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse @ViewModel.ShowString" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            <EditForm Model="@ViewModel">
+            @if (ViewModel.ConfigParams != null)
+            {
+                @foreach (var p in ViewModel.ConfigParams
+                    .Where(x=>!x.IsHidden && x.Name != "SectionName"))
+                {
+                    <div class="form-group">
+                        <label for="param">@p.Label</label>
+                        @switch (p.Type)
+                        {
+                            case "string":
+                                @if (p.IsSecret)
+                                {
+                                    <InputText type="password" id="param" class="form-control" @bind-Value="p.Value"/>
+                                }
+                                else
+                                {
+                                    <InputText type="text" id="param" class="form-control" @bind-Value="p.Value"/>
+                                }
+                                break;
+                            case "int":
+                                <InputNumber TValue="int" id="param" class="form-control" @bind-Value="p.ValueInt" />
+                                break;
+                            case "bool":
+                                <div class="form-check form-switch">
+                                    <InputCheckbox id="param" class="form-check-input" @bind-Value="p.ValueBool" />
+                                    </div>
+                                break;
+                            case "float":
+                                <InputNumber TValue="float" id="param" class="form-control" @bind-Value="p.ValueFloat" />
+                                break;
+                            case "double":
+                                <InputNumber TValue="double" id="param" class="form-control" @bind-Value="p.ValueDouble" />
+                                break;
+                            case "datetime":
+                                <InputDate TValue="DateTime" id="param" class="form-control" @bind-Value="p.ValueDateTime" />
+                                break;
+                            case "timezone":
+                                <InputText id="param" class="form-control" @bind-Value="p.Value" />
+                                <button class="btn btn-outline-primary" @onclick="()=>ShowTimezonesPopup(p)">Known time zones</button>
+                                break;
+                            case "text":
+                                <InputTextArea id="param" class="form-control" rows="5" @bind-Value="p.Value" />
+                                break;
+                            default:
+                                <InputText type="text" id="param" class="form-control" @bind-Value="p.Value"/>
+                                break;
+                        }
+                    </div>
+                }
+                <br/>
+                <button class="btn btn-primary" @onclick="ViewModel.UpdateSection">Update</button>
+            }
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public SectionViewModel ViewModel { get; set; }
+
+    private async Task ShowTimezonesPopup(ConfigParamViewModel param)
+    {
+        var popup = Modal.Show<Timezones>("Known time zones");
+        var result = await popup.Result;
+
+        if (!result.Cancelled)
+            param.Value = (string?)result.Data;
+    }
+}

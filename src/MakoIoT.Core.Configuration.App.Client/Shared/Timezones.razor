@@ -1,0 +1,34 @@
+﻿@using MakoIoT.Core.Configuration.App.Client.ViewModels
+
+@inject TimezonesViewModel ViewModel
+
+<div class="simple-form">
+    <div class="form-group">
+        <label for="timezone">Time zone</label>
+        <select id="timezone" @bind="ViewModel.SelectedTimezone" class="form-control">
+            @foreach (var item in ViewModel.AllTimezones)
+            {
+                <option value="@item.Id" class="dropdown-item">@item.DisplayName</option>
+            }
+        </select>
+    </div>
+    <br/>
+    <button @onclick="Ok" class="btn btn-primary">OK</button>
+    <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    private async Task Ok()
+    {
+        await ViewModel.Ok();
+        await BlazoredModal.CloseAsync(ModalResult.Ok(ViewModel.TimezoneString));
+    }
+
+    private async Task Cancel()
+    {
+        await ViewModel.Cancel();
+        await BlazoredModal.CancelAsync();
+    }
+}
